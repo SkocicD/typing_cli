@@ -1,6 +1,7 @@
 package main
 
 import (
+    "typing_cli/colors"
     "strings"
     "fmt"
     "log"
@@ -9,11 +10,6 @@ import (
     "time"
 )
 
-type colorstruct struct{
-    green string
-    red string
-    end string
-}
 type printString struct{
     content string
     color string
@@ -23,7 +19,6 @@ type boardRow struct{
     changed bool
 }
 
-var colors colorstruct
 var cursorLine int
 var maxLine int
 var board []boardRow
@@ -39,7 +34,7 @@ func streakString(streak int) string {
         str+="\u2588"
         i+=1
     }
-    str+=colors.end
+    str+=colors.Primary
     return str
 }
 
@@ -65,7 +60,7 @@ func updateStreak(streak int){
         newRow := boardRow{segments: []printString{}, changed: true}
         board = append(board,newRow)
     }
-    newSeg := printString{content: fmt.Sprintf("Streak: %d",streak), color: colors.green}
+    newSeg := printString{content: fmt.Sprintf("Streak: %d",streak), color: colors.Green}
     board[streakLine].segments = append(board[streakLine].segments, newSeg)
 }
 
@@ -88,7 +83,6 @@ func refresh(){
 }
 
 func main() {
-    colors=colorstruct{green: "\033[32m", end: "\033[0m", red: "\033[31m"}
     cursorLine=0
     maxLine=0
     lines["question"] = 0
@@ -109,7 +103,7 @@ func main() {
     // infinite loop
     for {
         question=rand.Intn(26)
-        updateLetter(alph[question], colors.green)
+        updateLetter(alph[question], colors.Green)
         updateStreak(streak)
         refresh()
 
@@ -121,7 +115,6 @@ func main() {
 
             // Correct answer
             if int(char)-97 == question {
-                // printAndCountLines(alph[question],colors.green) 
                 // time.Sleep(100*time.Millisecond)
                 streak+=1
                 break
