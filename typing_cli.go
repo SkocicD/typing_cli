@@ -5,9 +5,12 @@ import (
     "strings"
     "fmt"
     "log"
+    "flag"
+    "os"
     "math/rand"
     "github.com/mattn/go-tty"
     "time"
+    "golang.org/x/term"
 )
 
 type screenTile struct{
@@ -21,11 +24,27 @@ type box struct {
     width int
 }
 
-var termwidth = 181
-var linecount = 10
-// const boardsize = termwidth * linecount
-const boardsize = 181*10
-var board [boardsize]screenTile
+
+var termwidth int
+var termheight int
+var boardsize int
+
+var board [] screenTile
+
+func setBoardSize(){
+
+    width, height, err := term.GetSize(int(os.Stdin.Fd()))
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
+    termwidth = width
+    termheight = height
+    boardsize = termwidth * termheight
+    // fmt.Println(termwidth, termheight)
+
+    board = make([]screenTile, boardsize)
+}
 
 var slot1 = box{0,0,10,14}
 var slot2 = box{0,14,10,14}
@@ -58,7 +77,7 @@ func update(){
         toPrint += string(tile.content)
     }
     fmt.Println(toPrint)
-    fmt.Print(fmt.Sprintf("\033[%dA", linecount))
+    fmt.Print(fmt.Sprintf("\033[%dA", termheight))
 }
 
 // func updateLetter(letter string, color string){
@@ -147,6 +166,10 @@ func fillBox(bounds box, contents string, color string) int {
 // }
 
 func main() {
+    letters := flag.String("l","abcdefghijklmnopqrstuvwxyz", "The letters that will appear")
+    flag.Parse()
+    // fmt.Println(*letters)
+    setBoardSize()
     // init board
     for i := 0; i < len(board); i++{
         board[i].color = colors.Primary
@@ -169,12 +192,13 @@ func main() {
 
     // infinite loop
     var thisQ int
-    var nextQ = rand.Intn(26)
+    var nextQ = rand.Intn(len(*letters))
     var correct bool
     for {
         correct = true
+        randindex := rand.Intn(len(*letters))
         thisQ = nextQ
-        nextQ = rand.Intn(26)
+        nextQ = int((*letters)[randindex]-97)
         // updateStreak(streak)
 
         fillBox(currBox, alph[thisQ], colors.Primary)
